@@ -10,7 +10,7 @@ fi
 day=$1
 
 mkdir "$day"
-echo "#!/usr/bin/env awk -f" > "$day/solution.awk"
+echo "#!/usr/bin/env gawk -f" > "$day/solution.awk"
 chmod +x "$day/solution.awk"
 touch "$day/input.txt"
 touch "$day/example.txt"
