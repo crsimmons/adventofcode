@@ -18,12 +18,12 @@ mkdir "$day"
 echo "#!/usr/bin/env gawk -f" > "${day}/solution.awk"
 chmod +x "${day}/solution.awk"
 
-cat << EOF > "${day}/solution.rb"
-#!/usr/bin/env ruby
+# cat << EOF > "${day}/solution.rb"
+# #!/usr/bin/env ruby
 
-grid = ARGF.read
-EOF
-chmod +x "${day}/solution.rb"
+# grid = ARGF.read
+# EOF
+# chmod +x "${day}/solution.rb"
 
 curl -s --cookie cookies.txt "https://adventofcode.com/2021/day/${day}/input" > "${day}/input.txt"
 touch "${day}/example.txt"
