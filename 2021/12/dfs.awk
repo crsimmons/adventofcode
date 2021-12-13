@@ -1,12 +1,5 @@
 #!/usr/bin/env gawk -f
 
-function pv(v,  x) {
-  for (x in v) {
-    if (v[x]) printf "%s\n", x
-  }
-  printf "\n"
-}
-
 function count(str, e) {
   return gsub(e,"",str)
 }
