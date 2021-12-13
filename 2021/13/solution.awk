@@ -18,6 +18,7 @@ function fold(axis,line,   x,y,v,grid2) {
         # multiplying by 1 forces numerical comparison
         # (y-line) is distance from y to the reflection line (upwards)
         # line-x is the line that is distance x from the reflection line (upwards)
+        # go up from the line however far you were down from the line
         v=y*1<line*1?y:line-(y-line)
         grid2[x][v]="#"
         maxY=line-1
