@@ -11,16 +11,7 @@ function count(str, e) {
   return gsub(e,"",str)
 }
 
-function small_caves_unique(visited,   visited_caves, node, current_cave, count) {
-  split(visited,visited_caves,",")
-  for (node in visited_caves) {
-    current_cave=visited_caves[node]
-    if (count[current_cave]++ && current_cave == tolower(current_cave)) return 0
-  }
-  return 1
-}
-
-function dfs(current, visited,   node) {
+function dfs(current, visited, dupe,   node) {
   visited=visited current ","
   if (current == "end") {
     all_paths[visited]++
@@ -28,9 +19,10 @@ function dfs(current, visited,   node) {
   }
 
   for (node in edges[current]) {
-    if (!index(visited,node) || node != tolower(node)) {
-      dfs(node,visited)
+    if (index(visited,node) && node==tolower(node)) {
+      if (node!=dupe || count(visited,node)!=1) continue
     }
+    dfs(node,visited,dupe)
   }
 }
 
@@ -44,6 +36,13 @@ BEGIN{FS="-"}
 END{
   # initialize an empty array
   split("",all_paths)
-  dfs("start","")
+  dfs("start","","")
+  print length(all_paths)
+  split("", all_paths)
+  for (node in edges) {
+    if (node==tolower(node) && node!="start" && node!="end") {
+      dfs("start","",node)
+    }
+  }
   print length(all_paths)
 }

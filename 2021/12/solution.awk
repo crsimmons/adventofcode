@@ -49,6 +49,9 @@ BEGIN{FS="-"}
 END{
   # initialize an empty array
   split("",paths)
+  find_paths(neighbours,paths,"","start",1)
+  print length(paths)
+  split("",paths)
   find_paths(neighbours,paths,"","start",2)
   print length(paths)
 }
