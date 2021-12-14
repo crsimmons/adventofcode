@@ -1,37 +1,38 @@
 #!/usr/bin/env gawk -f
 
-function sum_result(   L, x) {
-  for (x in P) L[substr(x,1,1)]+=P[x]
-  L[substr(S,s,1)]++
-  asort(L)
-  print L[length(L)] - L[1]
+function sum_result(   Letters, x) {
+  for (x in Pairs) Letters[substr(x,1,1)]+=Pairs[x]
+  # Last letter of original template is last letter of final template
+  Letters[substr(Template,s,1)]++
+  asort(Letters)
+  print Letters[length(Letters)] - Letters[1]
 }
 
 function arrcpy(arr,   x) {
-  delete P
-  for (x in arr) P[x]=arr[x]
+  delete Pairs
+  for (x in arr) Pairs[x]=arr[x]
 }
 
 BEGIN{FS=" -> "}
 
-/>/{D[$1]=$2; next}
+/>/{Rules[$1]=$2; next}
 
 /\S/{
-  S=$0
-  for (s=1;s<length(S);s++) P[substr(S,s,2)]++
+  Template=$0
+  for (s=1;s<length(Template);s++) Pairs[substr(Template,s,2)]++
 }
 
 END{
   for (;++i<=40;) {
-    delete P2
-    for (p in P) {
+    delete Pairs2
+    for (p in Pairs) {
       split(p,pa,"")
-      np=pa[1] D[p]
-      P2[np]+=P[p]
-      np=D[p] pa[2]
-      P2[np]+=P[p]
+      np=pa[1] Rules[p]
+      Pairs2[np]+=Pairs[p]
+      np=Rules[p] pa[2]
+      Pairs2[np]+=Pairs[p]
     }
-    arrcpy(P2)
+    arrcpy(Pairs2)
     if (i==10 || i==40) sum_result()
   }
 }
