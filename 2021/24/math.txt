@@ -1,0 +1,46 @@
+x=z
+x=z%26
+x=z%26 + B
+x=1 if (z%26 + B) == w else 0
+x=1 if the above is 0 else 0
+x=0 if (z%26 + B) == w else 1
+
+y=25
+y=25 * x
+y=(25 * x)+1
+
+z=y*z
+y=w+C
+y=x*y
+z=y+z
+
+z=((25 * x)+1)*z
+
+y=x * (w+C)
+
+
+x=0 if (z%26 + B) == w else 1
+
+z=(x * (w+C)) + (((25 * x)+1)*(z/A))
+
+z=(x * (w+C)) + (z/A)*(25 * x) + (z/A)
+
+z=x * ((z/A) * 25 + w + C) + (z/A)
+
+next_z=(0 if (z%26 + B) == w else 1) * ((z/A) * 25 + w + C) + (z/A)
+
+A -> line 5
+B -> line 6
+C -> line 16
+
+A == 26 if B<0 else 1
+
+When A==1 10<=B<=14 so (z%26 + B) must be greater than 9
+
+So when A==1, next_z=z * 25 + w + C + z = z * 26 + w + C
+
+So the value of z increases whenever A==1. There are 7 instances of A==1 and 7 of A==26 so for z to end up being 0 then the latter case must make (z%26 + B) == w true (so that next_z=z/A).
+
+So the last digit pushed (when A==1) w_prev+C must equal w_cur-B
+
+Or w_cur=w_prev+B_cur+C_prev
