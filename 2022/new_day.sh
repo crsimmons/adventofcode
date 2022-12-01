@@ -10,20 +10,18 @@ fi
 day=$1
 
 mkdir "$day"
-cat << EOF > "${day}/solution.py"
-#!/usr/bin/python3
+cat << EOF > "${day}/${day}.py"
+#!/usr/bin/env python3
 import sys
-
-from aocd import data
-from aocd import lines
-from aocd import numbers
 
 from collections import defaultdict
 
-exampledata = sys.argv[1] if len(sys.argv)>1 else 'example.txt'
-data = exampledata
-EOF
-chmod +x "${day}/solution.py"
+inputfile = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
+data = open(inputfile)
+lines = [l.strip() for l in data]
 
-aocd > input.txt
+EOF
+chmod +x "${day}/${day}.py"
+
+aocd > "${day}/input.txt"
 touch "${day}/example.txt"
