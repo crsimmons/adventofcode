@@ -48,61 +48,75 @@ def solve(part):
                         if nr < 0:
                             nf = RIGHT
                             nr, nc = nc + (2 * CUBE), 0
-                        # right to region 2
+                            assert getRegion(nr, nc) == 6
+                        # left to region 4
                         elif nc == CUBE - 1:
                             nf = RIGHT
                             nr, nc = (3 * CUBE) - 1 - nr, 0
+                            assert getRegion(nr, nc) == 4
                     case 2:
                         # up to region 6
                         if nr < 0:
                             nr, nc = (4 * CUBE) - 1, nc - (2 * CUBE)
-                        # right to region 4
+                            assert getRegion(nr, nc) == 6
+                        # right to region 5
                         elif nc == (3 * CUBE):
                             nf = LEFT
                             nr, nc = (3 * CUBE) - 1 - nr, (2 * CUBE) - 1
+                            assert getRegion(nr, nc) == 5
                         # down to region 3
                         elif nr == CUBE:
                             nf = LEFT
                             nr, nc = nc - CUBE, (2 * CUBE) - 1
+                            assert getRegion(nr, nc) == 3
                     case 3:
                         # right to region 2
                         if nc == (2 * CUBE):
                             nf = UP
                             nr, nc = CUBE - 1, nr + CUBE
-                        # left to region 5
+                            assert getRegion(nr, nc) == 2
+                        # left to region 4
                         elif nc == CUBE - 1:
                             nf = DOWN
                             nr, nc = (2 * CUBE), nr - CUBE
+                            assert getRegion(nr, nc) == 4
                     case 4:
                         # up to region 3
                         if nr == (2 * CUBE) - 1:
                             nf = RIGHT
                             nr, nc = nc + CUBE, CUBE
+                            assert getRegion(nr, nc) == 3
                         # left to region 1
                         elif nc < 0:
                             nf = RIGHT
                             nr, nc = (3 * CUBE) - 1 - nr, CUBE
+                            assert getRegion(nr, nc) == 1
                     case 5:
                         # right to region 2
                         if nc == (2 * CUBE):
                             nf = LEFT
                             nr, nc = (3 * CUBE) - 1 - nr, (3 * CUBE) - 1
+                            assert getRegion(nr, nc) == 2
                         # down to region 6
                         elif nr == (3 * CUBE):
                             nf = LEFT
-                            nr, nc = nc + (2 * CUBE), 49
+                            nr, nc = nc + (2 * CUBE), CUBE - 1
+                            assert getRegion(nr, nc) == 6
                     case 6:
                         # left to region 1
                         if nc < 0:
                             nf = DOWN
                             nr, nc = 0, nr - (2 * CUBE)
+                            assert getRegion(nr, nc) == 1
                         # down to region 2
                         elif nr == (4 * CUBE):
                             nr, nc = 0, nc + (2 * CUBE)
+                            assert getRegion(nr, nc) == 2
                         # right to region 5
                         elif nc == CUBE:
                             nf = UP
                             nr, nc = (3 * CUBE) - 1, nr - (2 * CUBE)
+                            assert getRegion(nr, nc) == 5
                 if M[nr + nc * 1j] == "#":
                     nf = f
                     break
@@ -155,6 +169,3 @@ UP = 3
 
 print(solve(1))
 print(solve(2))
-
-# 136054
-# 122153
