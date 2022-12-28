@@ -10,7 +10,7 @@ fi
 day=$1
 year=${2:-2023}
 
-dir="${year}/${day}"
+dir="${REPO_DIR}/${year}/${day}"
 
 if [[ -d "${dir}" ]]; then
   echo "$dir already exists - exiting"
