@@ -12,21 +12,30 @@ year=${2:-2023}
 
 dir="${REPO_DIR}/${year}/${day}"
 
-if [[ -d "${dir}" ]]; then
-  echo "$dir already exists - exiting"
-fi
+# dir="${REPO_DIR}/2023"
 
-mkdir -p "${dir}"
-cat << EOF > "${dir}/${day}.py"
-#!/usr/bin/env python3
-import sys
+# if [[ -d "${dir}" ]]; then
+#   echo "$dir already exists - exiting"
+#   exit
+# fi
 
-inputfile = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
-data = open(inputfile)
-lines = [l.strip() for l in data]
+# while read -r i; do
+#   mkdir -p "${dir}/$i"
+#   touch "${dir}/$i/example.txt"
 
-EOF
-chmod +x "${dir}/${day}.py"
+#   cat << EOF > "${dir}/$i/solution.py"
+# #!/usr/bin/env python3
+# import sys
+
+# inputfile = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
+# data = open(inputfile)
+# lines = [l.strip() for l in data]
+
+
+# EOF
+# done <<< "$(seq 3 25)"
+
+chmod +x "${dir}/solution.py"
 
 aocd "${day}" "${year}" > "${dir}/input.txt"
-touch "${dir}/example.txt"
+# touch "${dir}/example.txt"
