@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
+# ruff: noqa: F405, F403, E402
 import sys
 
+from lib import *
+
 inputfile = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
-data = open(inputfile)
-lines = [l.strip() for l in data]
+D = open(inputfile).read().strip()
+L = D.split("\n")
+G = [[c for c in row] for row in L]
+R = len(G)
+C = len(G[0])
 
 p1 = 0
 p2 = 0
@@ -20,7 +26,7 @@ lookup = {
     'nine':"9",
 }
 
-for l in lines:
+for l in L:
     p1_digits=[]
     p2_digits=[]
     for i, c in enumerate(l):

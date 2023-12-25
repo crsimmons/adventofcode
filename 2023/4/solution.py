@@ -1,22 +1,30 @@
 #!/usr/bin/env python3
+# ruff: noqa: F405, F403, E402
 import sys
-from collections import defaultdict
+from collections import defaultdict, deque
+
+import lib.grid as grid
+from lib.util import *
 
 inputfile = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
-data = open(inputfile)
-lines = [l.strip() for l in data]
+D = open(inputfile).read().strip()
+L = D.split("\n")
+
+G = grid.FixedGrid.parse(D)
+R = G.height
+C = G.width
 
 p1=0
-C = defaultdict(lambda:1)
+CARDS = defaultdict(lambda:1)
 
-for l in lines:
+for l in L:
     c, n = l.split(":")
     c = int(c.split()[-1])
     # defaultdict gives a default value but doesn't count
     # the element as existing in .values unless it has
     # actually been accessed/set
-    if c not in C:
-        C[c]=1
+    if c not in CARDS:
+        CARDS[c]=1
     w,h = n.split("|")
     w = [int(x) for x in w.split()]
     h = [int(x) for x in h.split()]
@@ -28,7 +36,7 @@ for l in lines:
 
     # defaultdict makes this work
     for j in range(c+1,c+s+1):
-        C[j]+=C[c]
+        CARDS[j]+=CARDS[c]
 
 print(p1)
-print(sum(C.values()))
+print(sum(CARDS.values()))

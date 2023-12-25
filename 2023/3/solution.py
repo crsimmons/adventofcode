@@ -1,54 +1,52 @@
 #!/usr/bin/env python3
+# ruff: noqa: F405, F403, E402
 import sys
-from collections import defaultdict
+from collections import defaultdict, deque
+
+import lib.grid as grid
+from lib.util import *
 
 inputfile = sys.argv[1] if len(sys.argv) > 1 else "input.txt"
-data = open(inputfile)
-lines = [l.strip() for l in data]
+D = open(inputfile).read().strip()
+L = D.split("\n")
 
-grid = [list(l) for l in lines]
-
-rnum = len(grid)
-cnum = len(grid[0])
-
-directions = [(-1, 0), (0, 1), (1, 0), (0, -1),(-1,-1),(1,1),(-1,1),(1,-1)]
+G = grid.FixedGrid.parse(D)
+R = G.height
+C = G.width
 
 def concat(a, b):
     return int(str(a) + str(b))
 
-is_part=False
-p1=0
-p2=0
-gears=defaultdict(list)
+is_part = False
+p1 = p2 = 0
+gears = defaultdict(list)
 
-for r in range(rnum):
-    gear_coords=set()
-    num=0
+for r in range(R):
+    gear_coords = set()
+    num = 0
     # need to iterate the cnum+1 because we need to evaluate
     # digits in the final column
-    for c in range(cnum+1):
-        if c<cnum and grid[r][c].isdigit():
-            num=concat(num, grid[r][c])
-            for (dr,dc) in directions:
-                nr = r + dr
-                nc = c + dc
-                if 0 <= nr < rnum and 0 <= nc < cnum:
-                    if not grid[nr][nc].isdigit() and not grid[nr][nc] == ".":
+    for c in range(C+1):
+        if c < C and G[r,c].isdigit():
+            num = concat(num, G[r,c])
+            for (nr,nc) in G.adj(r,c,True):
+                if 0 <= nr < R and 0 <= nc < C:
+                    if not G[nr,nc].isdigit() and not G[nr,nc] == ".":
                         is_part = True
-                    if grid[nr][nc]=="*":
+                    if G[nr,nc] == "*":
                         gear_coords.add((nr,nc))
-        elif num>0:
+        elif num > 0:
             if is_part:
-                p1+=num
-            is_part=False
+                p1 += num
+            is_part = False
             for gear in gear_coords:
                 gears[gear].append(num)
-            num=0
-            gear_coords=set()
+            num = 0
+            gear_coords = set()
 
-for _,v in gears.items():
-    if len(v)==2:
-        p2+=v[0]*v[1]
+for _, v in gears.items():
+    if len(v) == 2:
+        p2 += v[0]*v[1]
 
 print(p1)
 print(p2)
