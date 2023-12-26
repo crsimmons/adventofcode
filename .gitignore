@@ -1,3 +1,4 @@
 .envrc
 **/input.txt
 place.txt
+**/__pycache__/
