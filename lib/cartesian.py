@@ -26,10 +26,10 @@ def poly_area(points, perimeter):
 
 def shoe_area(points):
     """
-    Calculates the area of a shoe given a list of points using the shoelace formula.
+    Calculates the area of a polygon given a list of points using the shoelace formula.
 
     Args:
-        points (List[Tuple[int, int]]): A list of points representing the vertices of the shoe.
+        points (List[Tuple[int, int]]): A list of points representing the vertices of the polygon.
 
     Returns:
         int: The area of the polygon.

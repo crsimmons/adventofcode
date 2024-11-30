@@ -12,6 +12,21 @@ class FixedGrid:
 
     @staticmethod
     def parse(s, linesplit_fn=None, line_separator='\n', value_fn=None):
+        """Parse a string into a grid of values.
+
+        Args:
+            s: The string to parse.
+            linesplit_fn: A function to split the line into a list of values.
+                If None, the line is split into a list of strings.
+            line_separator: The string to split the input string into lines.
+                Defaults to the newline character.
+            value_fn: A function to map the value of each element in the line
+                list to the value stored in the grid. If None, the values are
+                stored as strings.
+
+        Returns:
+            A FixedGrid object containing the parsed grid.
+        """
         grid = []
         for line in s.split(line_separator):
             if linesplit_fn is not None:
@@ -48,46 +63,135 @@ class FixedGrid:
                            for r in range(low_r, high_r+1)]
                           for c in range(low_c, high_c+1)])
 
+    @staticmethod
+    def default_fill(width, height, value):
+        """
+        Create a FixedGrid of specified dimensions filled with a default value.
+
+        Args:
+            width (int): The number of columns in the grid.
+            height (int): The number of rows in the grid.
+            value: The default value to fill in each cell of the grid.
+
+        Returns:
+            FixedGrid: A grid where each cell is filled with the specified default value.
+        """
+        return FixedGrid([[value for _ in range(width)] for _ in range(height)])
+
     def to_dict(self):
+        """
+        Convert the grid to a coordinate->value dictionary.
+
+        Returns:
+            dict: A dictionary from (r,c) coordinates to the value at that
+                coordinate in the grid.
+        """
         return {(r,c): val
                 for r,row in enumerate(self._grid)
                 for c,val in enumerate(row)}
 
     def transpose(self):
+        """
+        Transpose the grid.
+
+        Returns:
+            FixedGrid: A new FixedGrid instance with rows and columns swapped.
+        """
         return FixedGrid([[self._grid[r][c]
                           for c in range(self._width)]
                            for r in range(self._height)])
 
     @property
     def width(self):
+        """
+        Retrieve the width of the grid.
+
+        Returns:
+            int: The width of the grid.
+        """
         return self._width
 
     @property
     def height(self):
+        """
+        Retrieve the height of the grid.
+
+        Returns:
+            int: The height of the grid.
+        """
         return self._height
 
     @property
     def rows(self):
+        """
+        Retrieve the rows of the grid.
+
+        Returns:
+            list: A list of lists, where each inner list contains the elements of a row in the grid.
+        """
         return self._grid
 
     @property
     def columns(self):
+        """
+        Retrieve the columns of the grid.
+
+        Returns:
+            list: A list of tuples, where each tuple contains the elements of a column in the grid.
+        """
         return list(zip(*self._grid))
 
     @property
     def area(self):
+        """
+        Calculate the area of the grid.
+
+        Returns:
+            int: The area of the grid, calculated as the product of its width and height.
+        """
         return self._width * self._height
 
     def __contains__(self, coord):
+        """
+        Check if a coordinate is contained within the grid.
+
+        Parameters:
+        - coord (tuple): A tuple representing the (row, column) coordinate.
+
+        Returns:
+        - bool: True if the coordinate is within the grid bounds, False otherwise.
+        """
         r, c = coord
         return 0 <= r < self._height and 0 <= c < self._width
 
     def __getitem__(self, coord):
+        """
+        Retrieve the value at a specific coordinate in the grid.
+
+        Args:
+            coord (tuple): A tuple representing the (row, column) coordinate.
+
+        Returns:
+            The value at the specified coordinate.
+
+        Raises:
+            AssertionError: If the provided coordinate is out of the grid bounds.
+        """
         r, c = coord
         assert(0 <= r < self._height and 0 <= c < self._width)
         return self._grid[r][c]
 
     def __setitem__(self, coord, val):
+        """
+        Set the value at a specific coordinate in the grid.
+
+        Args:
+            coord (tuple): A tuple representing the (row, column) coordinate.
+            val: The value to set at the specified coordinate.
+
+        Raises:
+            AssertionError: If the provided coordinate is out of the grid bounds.
+        """
         r, c = coord
         assert(0 <= r < self._height and 0 <= c < self._width)
         self._grid[r][c] = val
@@ -108,6 +212,15 @@ class FixedGrid:
                     yield (r, c), val
 
     def adj(self, r, c, diagonals=False, ignore_bounds=False):
+        """Returns an iterator over the adjacent coordinates to (r,c) in the grid.
+
+        Arguments:
+        diagonals -- include diagonals in the iteration
+        ignore_bounds -- yield coordinates that are off the grid
+
+        Usage:
+            for nr, nc in G.adj(r,c)
+        """
         if not ignore_bounds:
             assert(0 <= r < self._height and 0 <= c < self._width)
         if diagonals:
@@ -134,12 +247,26 @@ class FixedGrid:
                     yield r, c+1
 
     def print(self, line_spacing=' '):
+        """
+        Print the grid to the console.
+
+        Args:
+            line_spacing (str): The string to insert between elements of a row when printing.
+        """
         print(self.as_str(line_spacing))
 
     def as_str(self, line_spacing=' '):
-        return '\n'.join(line_spacing.join(str(self._grid[r][c])
-                                           for c in range(self._height))
-                         for r in range(self._width))
+        """
+        Convert the grid to a string representation.
+
+        Args:
+            line_spacing (str): The string to insert between elements of a row.
+
+        Returns:
+            str: A string representation of the grid, where each row is joined by the specified line_spacing
+                and rows are separated by newlines.
+        """
+        return "\n".join(line_spacing.join(map(str, row)) for row in self._grid)
 
     def find(self, ch):
         """

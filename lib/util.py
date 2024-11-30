@@ -46,6 +46,12 @@ def split_range(op, n, lo, hi):
 
     Returns:
         tuple: A tuple containing the new lower bound, new upper bound, opposite lower bound, and opposite upper bound.
+
+    Examples:
+        split_range(">", 5, 0, 10) -> (6, 10, 0, 5)
+        split_range("<", 5, 0, 10) -> (0, 4, 6, 10)
+        split_range(">=", 5, 0, 10) -> (5, 10, 0, 4)
+        split_range("<=", 5, 0, 10) -> (0, 5, 6, 10)
     """
     alo, ahi = lo, hi
     if op == ">":
