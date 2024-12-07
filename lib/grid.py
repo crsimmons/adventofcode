@@ -1,4 +1,6 @@
 import itertools
+import json
+import re
 
 
 class FixedGrid:
@@ -285,6 +287,23 @@ class FixedGrid:
                     return r, c
         return None
 
+    def findr(self, regex):
+        """
+        Find the first occurrence of a value in the grid that matches a given regex pattern.
+
+        Args:
+            regex (str): The regular expression pattern to search for.
+
+        Returns:
+            tuple[int, int] or None: The index of the first occurrence of a value that matches
+                the regex pattern in the grid, represented as a tuple (row, column). Returns None
+                if no match is found.
+        """
+        for r, row in enumerate(self._grid):
+            for c, val in enumerate(row):
+                if re.match(regex, val):
+                    return r, c
+
     def find_all(self, ch):
         """
         Find all occurrences of a character in the grid.
@@ -298,6 +317,24 @@ class FixedGrid:
         return [(r, c) for r, row in enumerate(self._grid)
                 for c, val in enumerate(row) if val == ch]
 
+    def find_allr(self, regex):
+        """
+        Find all occurrences of a value in the grid that matches a given regex pattern.
+
+        Args:
+            regex (str): The regular expression pattern to search for.
+
+        Returns:
+            list of tuples: A list of tuples representing the row and column indices of all occurrences of values that
+                match the regex pattern in the grid.
+        """
+        return [
+            (r, c)
+            for r, row in enumerate(self._grid)
+            for c, val in enumerate(row)
+            if re.match(regex, val)
+        ]
+
     def rotate(self):
         """
         Rotate the grid clockwise.
@@ -310,3 +347,17 @@ class FixedGrid:
         """
         self._grid = list(map(list, zip(*self._grid[::-1])))
         # return FixedGrid(list(map(list, zip(*self._grid[::-1]))))
+
+    def quick_copy(self):
+        """
+        Create a quick copy of the grid.
+
+        This is a convenience function for creating a copy of the grid. It is
+        implemented by serializing the grid to a string and then parsing it back into
+        a new grid.
+
+        Returns:
+            FixedGrid: A new FixedGrid object with the same values as the original
+        """
+        dump = self.as_str(line_spacing="")
+        return FixedGrid.parse(dump)

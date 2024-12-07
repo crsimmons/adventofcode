@@ -70,3 +70,26 @@ def split_range(op, n, lo, hi):
         assert False
 
     return lo, hi, alo, ahi
+
+def find_middle(lst):
+    """
+    Find the middle element(s) of a list.
+
+    Args:
+        lst (list): The list from which to find the middle element(s).
+
+    Returns:
+        element or tuple: The middle element if the list length is odd,
+        otherwise a tuple containing the two middle elements if the list
+        length is even.
+
+    Raises:
+        ValueError: If the list is empty.
+    """
+    n = len(lst)
+    if n == 0:
+        raise ValueError("The list is empty")
+    if n % 2 == 1:
+        return lst[n // 2]
+    else:
+        return lst[(n // 2) - 1], lst[n // 2]
