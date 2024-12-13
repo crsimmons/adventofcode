@@ -93,3 +93,17 @@ def find_middle(lst):
         return lst[n // 2]
     else:
         return lst[(n // 2) - 1], lst[n // 2]
+
+def perp_dirs(d):
+    """
+    Given a direction vector, return two vectors which are perpendicular to
+    it.
+
+    Args:
+        d (tuple): The direction vector.
+
+    Returns:
+        list: A list of two tuples, each of which is a direction vector
+        perpendicular to the input direction vector.
+    """
+    return [(d[1], -d[0]), (-d[1], d[0])]
