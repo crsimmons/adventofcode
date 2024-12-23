@@ -27,13 +27,4 @@ print(
     sum(1 for triangle in triangles if any(node.startswith("t") for node in triangle))
 )
 
-print(
-    ",".join(
-        sorted(
-            max(
-                cliques,
-                key=len,
-            )
-        )
-    )
-)
+print(",".join(sorted(cliques[-1])))
