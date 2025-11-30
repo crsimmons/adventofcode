@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# initial setup
+
+while read -r i; do
+  dir="${REPO_DIR}/2025"
+  mkdir -p "${dir}/$i"
+  touch "${dir}/$i/example.txt"
+
+  cp "${REPO_DIR}/template.py" "${dir}/$i/solution.py"
+  chmod +x "${dir}/$i/solution.py"
+done <<< "$(seq 1 12)"

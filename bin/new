@@ -8,19 +8,8 @@ if [[ ! $# -ge 1 ]]; then
 fi
 
 day=$1
-year=${2:-2024}
+year=${2:-2025}
 
 dir="${REPO_DIR}/${year}/${day}"
 
 aocd "${day}" "${year}" > "${dir}/input.txt"
-
-# initial setup
-
-# while read -r i; do
-#   dir="${REPO_DIR}/2024"
-#   mkdir -p "${dir}/$i"
-#   touch "${dir}/$i/example.txt"
-
-#   cp "${REPO_DIR}/template.py" "${dir}/$i/solution.py"
-#   chmod +x "${dir}/$i/solution.py"
-# done <<< "$(seq 1 25)"
