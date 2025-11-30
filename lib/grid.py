@@ -7,9 +7,28 @@ class FixedGrid:
     bugs.
     '''
     def __init__(self, grid):
+        # Validate input: must be a non-empty rectangular sequence of rows
+        if not isinstance(grid, list):
+            raise TypeError("grid must be a list of rows")
+        if len(grid) == 0:
+            raise ValueError("grid must contain at least one row")
+        row0 = grid[0]
+        if not isinstance(row0, list):
+            raise TypeError("each row in grid must be a list")
+        width = len(row0)
+        if width == 0:
+            raise ValueError("grid rows must contain at least one column")
+        for i, row in enumerate(grid):
+            if not isinstance(row, list):
+                raise TypeError(f"row {i} is not a list")
+            if len(row) != width:
+                raise ValueError("all rows in grid must have the same length")
+
         self._grid = grid
         self._height = len(self._grid)
-        self._width = len(self._grid[0])
+        self._width = width
+        # cached columns (invalidated on mutation)
+        self._columns_cache = None
 
     @staticmethod
     def parse(s, linesplit_fn=None, line_separator='\n', value_fn=None):
@@ -31,38 +50,45 @@ class FixedGrid:
         grid = []
         for line in s.split(line_separator):
             if linesplit_fn is not None:
-                line = linesplit_fn(line)
-            if value_fn is None:
-                grid.append(list(line))
+                parts = linesplit_fn(line)
             else:
-                grid.append(list(map(value_fn, line)))
+                parts = list(line)
+            if value_fn is None:
+                grid.append(list(parts))
+            else:
+                grid.append(list(map(value_fn, parts)))
         return FixedGrid(grid)
 
     @staticmethod
     def from_dict(d, missing=None):
-        '''Converts a coordinate->value dictionary to a FixedGrid.
-        Expects that minimum r and c coordinates in the grid are both 0.
+        """Converts a coordinate->value dictionary to a FixedGrid.
 
-        Arguments:
-        missing -- Value to use for any coordinates not present in the dictionary
-        '''
-        low_r, high_r = None, None
-        low_c, high_c = None, None
-        for c, r in d.keys():
-            if low_c is None:
-                low_r, high_r = r, r
-                low_c, high_c = c, c
-            else:
-                low_r = min(low_r, r)
-                high_r = max(high_r, r)
-                low_c = min(low_c, c)
-                high_c = max(high_c, c)
+        Accepts mappings where keys are ``(r, c)`` tuples (row, column). The
+        grid returned will cover the minimal bounding rectangle of the keys
+        (i.e. from min row/min column to max row/max column). Missing
+        coordinates are filled with the provided ``missing`` value.
 
-        assert(low_r == low_c == 0)
+        Args:
+            d (dict): Mapping from (r, c) -> value.
+            missing: Value to use for coordinates not present in the dictionary.
 
-        return FixedGrid([[d.get((r, c), missing)
-                           for r in range(low_r, high_r+1)]
-                          for c in range(low_c, high_c+1)])
+        Returns:
+            FixedGrid: Grid spanning the bounding rectangle of provided keys.
+        """
+        if not d:
+            raise ValueError("from_dict requires a non-empty dictionary")
+
+        low_r = min(r for r, c in d.keys())
+        high_r = max(r for r, c in d.keys())
+        low_c = min(c for r, c in d.keys())
+        high_c = max(c for r, c in d.keys())
+
+        rows = []
+        for r in range(low_r, high_r + 1):
+            row = [d.get((r, c), missing) for c in range(low_c, high_c + 1)]
+            rows.append(row)
+
+        return FixedGrid(rows)
 
     @staticmethod
     def default_fill(width, height, value):
@@ -98,9 +124,10 @@ class FixedGrid:
         Returns:
             FixedGrid: A new FixedGrid instance with rows and columns swapped.
         """
-        return FixedGrid([[self._grid[r][c]
-                          for c in range(self._width)]
-                           for r in range(self._height)])
+        # return FixedGrid([[self._grid[r][c]
+        #                   for c in range(self._width)]
+        #                    for r in range(self._height)])
+        return FixedGrid(list(map(list, zip(*self._grid))))
 
     @property
     def width(self):
@@ -140,7 +167,11 @@ class FixedGrid:
         Returns:
             list: A list of tuples, where each tuple contains the elements of a column in the grid.
         """
-        return list(zip(*self._grid))
+        # cache columns to avoid recomputing on every access; invalidate on mutations
+        if self._columns_cache is None:
+            # convert to tuples to keep the columns immutable-like
+            self._columns_cache = [tuple(col) for col in zip(*self._grid)]
+        return self._columns_cache
 
     @property
     def area(self):
@@ -196,6 +227,8 @@ class FixedGrid:
         r, c = coord
         assert(0 <= r < self._height and 0 <= c < self._width)
         self._grid[r][c] = val
+        # mutation invalidates cached columns
+        self._columns_cache = None
 
     def items(self, column_first = False):
         '''Generates all coordinate,value pairs in the grid for iteration.
@@ -302,6 +335,7 @@ class FixedGrid:
             for c, val in enumerate(row):
                 if re.match(regex, val):
                     return r, c
+        return None
 
     def find_all(self, ch):
         """
@@ -345,7 +379,11 @@ class FixedGrid:
         - None
         """
         self._grid = list(map(list, zip(*self._grid[::-1])))
-        # return FixedGrid(list(map(list, zip(*self._grid[::-1]))))
+        # update cached dimensions and invalidate derived caches
+        self._height = len(self._grid)
+        self._width = len(self._grid[0]) if self._grid and self._grid[0] else 0
+        self._columns_cache = None
+        # Note: this method mutates the grid in-place. Use `transpose()` if you need a new FixedGrid.
 
     def quick_copy(self):
         """
@@ -358,5 +396,5 @@ class FixedGrid:
         Returns:
             FixedGrid: A new FixedGrid object with the same values as the original
         """
-        dump = self.as_str(line_spacing="")
-        return FixedGrid.parse(dump)
+        # shallow-copy rows to preserve element types while avoiding shared lists
+        return FixedGrid([row[:] for row in self._grid])
