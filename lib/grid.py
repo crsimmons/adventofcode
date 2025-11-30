@@ -3,10 +3,29 @@ import re
 
 
 class FixedGrid:
-    '''Fixed size grid utility class to simplify grid operations and minimize
-    bugs.
-    '''
+    """Fixed-size 2D grid utility for Advent of Code puzzles.
+
+    Coordinate Convention
+    ---------------------
+    All coordinates are expressed as (r, c) tuples where:
+    - r is the row index (0 to height-1)
+    - c is the column index (0 to width-1)
+
+    Internal storage is a list-of-rows (self._grid) so indexing is
+    self._grid[r][c]. All methods follow this (r, c) convention.
+    """
     def __init__(self, grid):
+        """Create a FixedGrid from a list-of-rows.
+
+        Args:
+            grid (list[list[Any]]): A non-empty list of rows. Each row must be
+                a list with the same length (rectangular grid required).
+
+        Raises:
+            TypeError: If grid is not a list or any row is not a list.
+            ValueError: If grid is empty, any row is empty, or rows have
+                unequal lengths.
+        """
         # Validate input: must be a non-empty rectangular sequence of rows
         if not isinstance(grid, list):
             raise TypeError("grid must be a list of rows")
@@ -32,20 +51,30 @@ class FixedGrid:
 
     @staticmethod
     def parse(s, linesplit_fn=None, line_separator='\n', value_fn=None):
-        """Parse a string into a grid of values.
+        """Parse a string into a FixedGrid.
 
         Args:
-            s: The string to parse.
-            linesplit_fn: A function to split the line into a list of values.
-                If None, the line is split into a list of strings.
-            line_separator: The string to split the input string into lines.
-                Defaults to the newline character.
-            value_fn: A function to map the value of each element in the line
-                list to the value stored in the grid. If None, the values are
-                stored as strings.
+            s (str): The string to parse.
+            linesplit_fn (callable, optional): Function to split each line into
+                values. If None, each character becomes a cell.
+                Example: str.split or lambda line: line.split(',').
+            line_separator (str): String used to split lines. Defaults to '\\n'.
+            value_fn (callable, optional): Function to transform each parsed
+                value. Example: int to convert strings to integers.
 
         Returns:
-            A FixedGrid object containing the parsed grid.
+            FixedGrid: The parsed grid.
+
+        Raises:
+            See __init__ for validation errors on empty or non-rectangular grids.
+
+        Example:
+            >>> G = FixedGrid.parse("abc\\ndef")
+            >>> G[0, 1]
+            'b'
+            >>> G2 = FixedGrid.parse("1,2\\n3,4", linesplit_fn=lambda x: x.split(','), value_fn=int)
+            >>> G2[1, 0]
+            3
         """
         grid = []
         for line in s.split(line_separator):
@@ -63,17 +92,27 @@ class FixedGrid:
     def from_dict(d, missing=None):
         """Converts a coordinate->value dictionary to a FixedGrid.
 
-        Accepts mappings where keys are ``(r, c)`` tuples (row, column). The
+        Accepts mappings where keys are (r, c) tuples (row, column). The
         grid returned will cover the minimal bounding rectangle of the keys
         (i.e. from min row/min column to max row/max column). Missing
-        coordinates are filled with the provided ``missing`` value.
+        coordinates are filled with the provided missing value.
 
         Args:
             d (dict): Mapping from (r, c) -> value.
             missing: Value to use for coordinates not present in the dictionary.
+                Defaults to None.
 
         Returns:
             FixedGrid: Grid spanning the bounding rectangle of provided keys.
+
+        Raises:
+            ValueError: If d is empty.
+
+        Example:
+            >>> d = {(0, 0): 'a', (0, 2): 'c', (1, 1): 'x'}
+            >>> G = FixedGrid.from_dict(d, missing='.')
+            >>> G.as_str('')
+            'a.c\\n.x.'
         """
         if not d:
             raise ValueError("from_dict requires a non-empty dictionary")
@@ -197,32 +236,38 @@ class FixedGrid:
         return 0 <= r < self._height and 0 <= c < self._width
 
     def __getitem__(self, coord):
-        """
-        Retrieve the value at a specific coordinate in the grid.
+        """Retrieve the value at a specific coordinate in the grid.
 
         Args:
-            coord (tuple): A tuple representing the (row, column) coordinate.
+            coord (tuple[int, int]): The (row, column) coordinate.
 
         Returns:
-            The value at the specified coordinate.
+            Any: The value at the specified coordinate.
 
         Raises:
-            AssertionError: If the provided coordinate is out of the grid bounds.
+            AssertionError: If the coordinate is out of bounds.
+
+        Example:
+            >>> G = FixedGrid([['a', 'b'], ['c', 'd']])
+            >>> G[0, 1]
+            'b'
         """
         r, c = coord
         assert(0 <= r < self._height and 0 <= c < self._width)
         return self._grid[r][c]
 
     def __setitem__(self, coord, val):
-        """
-        Set the value at a specific coordinate in the grid.
+        """Set the value at a specific coordinate in the grid.
 
         Args:
-            coord (tuple): A tuple representing the (row, column) coordinate.
-            val: The value to set at the specified coordinate.
+            coord (tuple[int, int]): The (row, column) coordinate.
+            val (Any): The value to set at the specified coordinate.
 
         Raises:
-            AssertionError: If the provided coordinate is out of the grid bounds.
+            AssertionError: If the coordinate is out of bounds.
+
+        Note:
+            This method mutates the grid and invalidates the cached columns.
         """
         r, c = coord
         assert(0 <= r < self._height and 0 <= c < self._width)
@@ -230,12 +275,22 @@ class FixedGrid:
         # mutation invalidates cached columns
         self._columns_cache = None
 
-    def items(self, column_first = False):
-        '''Generates all coordinate,value pairs in the grid for iteration.
+    def items(self, column_first=False):
+        """Generate all (coordinate, value) pairs in the grid.
 
-        Arguments:
-        column_first -- Iterate by column first rather than by row first
-        '''
+        Args:
+            column_first (bool): If True, iterate column-major order (all cells
+                in column 0, then column 1, etc.). If False (default), iterate
+                row-major order (all cells in row 0, then row 1, etc.).
+
+        Yields:
+            tuple[tuple[int, int], Any]: Yields ((r, c), value) pairs.
+
+        Example:
+            >>> G = FixedGrid([['a', 'b'], ['c', 'd']])
+            >>> list(G.items())
+            [((0, 0), 'a'), ((0, 1), 'b'), ((1, 0), 'c'), ((1, 1), 'd')]
+        """
         if column_first:
             for c in range(self._width):
                 for r, row in enumerate(self._grid):
@@ -246,14 +301,33 @@ class FixedGrid:
                     yield (r, c), val
 
     def adj(self, r, c, diagonals=False, ignore_bounds=False):
-        """Returns an iterator over the adjacent coordinates to (r,c) in the grid.
+        """Yield adjacent coordinates to (r, c).
 
-        Arguments:
-        diagonals -- include diagonals in the iteration
-        ignore_bounds -- yield coordinates that are off the grid
+        Args:
+            r (int): Row index of the cell.
+            c (int): Column index of the cell.
+            diagonals (bool): If True, include diagonal neighbors (8 total).
+                If False (default), only cardinal directions (4 total: up, down,
+                left, right).
+            ignore_bounds (bool): If True, yield coordinates even if they fall
+                outside the grid. If False (default), only yield valid in-bounds
+                coordinates.
+
+        Yields:
+            tuple[int, int]: Adjacent (row, column) coordinates.
+
+        Raises:
+            AssertionError: If (r, c) is out of bounds and ignore_bounds is False.
+
+        Example:
+            >>> G = FixedGrid([['a', 'b', 'c'], ['d', 'e', 'f']])
+            >>> list(G.adj(0, 1))  # middle of top row
+            [(0, 0), (0, 2), (1, 1)]
+            >>> list(G.adj(0, 1, diagonals=True))
+            [(0, 0), (0, 2), (1, 0), (1, 1), (1, 2)]
 
         Usage:
-            for nr, nc in G.adj(r,c)
+            for nr, nc in G.adj(r, c)
         """
         if not ignore_bounds:
             assert(0 <= r < self._height and 0 <= c < self._width)
@@ -303,15 +377,21 @@ class FixedGrid:
         return "\n".join(line_spacing.join(map(str, row)) for row in self._grid)
 
     def find(self, ch):
-        """
-        Find the first occurrence of a character in the grid.
+        """Find the first occurrence of a value in the grid.
 
         Args:
-            ch (str): The character to search for.
+            ch: The value to search for (compared using ==).
 
         Returns:
-            tuple[int, int] or None: The index of the first occurrence of the character in the grid,
-                represented as a tuple (row, column). Returns None if the character is not found.
+            tuple[int, int] | None: The (row, column) coordinate of the first
+                occurrence, or None if not found. Scans row-major order.
+
+        Example:
+            >>> G = FixedGrid([['a', 'b'], ['c', 'b']])
+            >>> G.find('b')
+            (0, 1)
+            >>> G.find('z') is None
+            True
         """
         for r, row in enumerate(self._grid):
             for c, val in enumerate(row):
@@ -320,16 +400,22 @@ class FixedGrid:
         return None
 
     def findr(self, regex):
-        """
-        Find the first occurrence of a value in the grid that matches a given regex pattern.
+        """Find the first occurrence of a value matching a regex pattern.
 
         Args:
-            regex (str): The regular expression pattern to search for.
+            regex (str | re.Pattern): Regular expression pattern to match.
+                Uses re.match, so pattern must match from the start of the value.
 
         Returns:
-            tuple[int, int] or None: The index of the first occurrence of a value that matches
-                the regex pattern in the grid, represented as a tuple (row, column). Returns None
-                if no match is found.
+            tuple[int, int] | None: The (row, column) coordinate of the first
+                match, or None if no match is found. Scans row-major order.
+
+        Example:
+            >>> G = FixedGrid([['a1', 'b2'], ['c3', 'd4']])
+            >>> G.findr(r'[cd]\\d')
+            (1, 0)
+            >>> G.findr(r'z.*') is None
+            True
         """
         for r, row in enumerate(self._grid):
             for c, val in enumerate(row):
@@ -338,28 +424,43 @@ class FixedGrid:
         return None
 
     def find_all(self, ch):
-        """
-        Find all occurrences of a character in the grid.
+        """Find all positions where a value equals the given character.
 
-        Parameters:
+        Args:
             ch (str): The character to search for.
 
         Returns:
-            list of tuples: A list of tuples representing the row and column indices of all occurrences of the character in the grid.
+            list[tuple[int, int]]: List of (row, column) coordinates for all
+                occurrences of ch. Returns empty list if not found.
+
+        Example:
+            >>> G = FixedGrid([['a', 'b'], ['a', 'd']])
+            >>> G.find_all('a')
+            [(0, 0), (1, 0)]
+            >>> G.find_all('z')
+            []
         """
         return [(r, c) for r, row in enumerate(self._grid)
                 for c, val in enumerate(row) if val == ch]
 
     def find_allr(self, regex):
-        """
-        Find all occurrences of a value in the grid that matches a given regex pattern.
+        """Find all positions where a value matches the given regex.
+
+        Uses re.match(), so the pattern must match from the start of the string.
 
         Args:
             regex (str): The regular expression pattern to search for.
 
         Returns:
-            list of tuples: A list of tuples representing the row and column indices of all occurrences of values that
-                match the regex pattern in the grid.
+            list[tuple[int, int]]: List of (row, column) coordinates for all
+                matches. Returns empty list if no matches found.
+
+        Example:
+            >>> G = FixedGrid([['a1', 'b2'], ['c3', 'a4']])
+            >>> G.find_allr(r'a\\d')
+            [(0, 0), (1, 1)]
+            >>> G.find_allr(r'z.*')
+            []
         """
         return [
             (r, c)
@@ -369,14 +470,23 @@ class FixedGrid:
         ]
 
     def rotate(self):
-        """
-        Rotate the grid clockwise.
+        """Rotate the grid 90 degrees clockwise IN-PLACE.
 
-        This function rotates the grid clockwise by reversing the order of the rows and then transposing the columns.
-        It does not take any parameters.
+        This method mutates the grid directly. The width and height are updated,
+        and cached properties (like columns) are invalidated.
 
         Returns:
-        - None
+            None
+
+        Note:
+            If you need a rotated copy without mutating the original, use
+            G.quick_copy().rotate() or manually build a new grid.
+
+        Example:
+            >>> G = FixedGrid([['a', 'b'], ['c', 'd']])
+            >>> G.rotate()
+            >>> G.as_str('')
+            'ca\\ndb'
         """
         self._grid = list(map(list, zip(*self._grid[::-1])))
         # update cached dimensions and invalidate derived caches
