@@ -56,16 +56,6 @@ def interior_points(area, boundary):
     # interior = area + 1 - perimeter // 2
     return area + 1 - boundary // 2
 
-def dist(p1, p2):
-    """
-    Calculates the Manhattan distance between two points.
-
-    :param p1: A tuple representing the coordinates of the first point.
-    :param p2: A tuple representing the coordinates of the second point.
-    :return: The Manhattan distance between the two points.
-    """
-    return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
-
 
 def order_points(points):
     """

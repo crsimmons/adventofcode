@@ -20,7 +20,6 @@ def nums(string):
     """
     return list(map(int, re.findall(r"-?\d+", string)))
 
-
 def rm_element(list, index):
     """
         Removes an element from a list at a given index.
@@ -107,3 +106,23 @@ def perp_dirs(d):
         perpendicular to the input direction vector.
     """
     return [(d[1], -d[0]), (-d[1], d[0])]
+
+def mdist(p1, p2):
+    """
+    Calculates the Manhattan distance between two points.
+
+    :param p1: A tuple representing the coordinates of the first point.
+    :param p2: A tuple representing the coordinates of the second point.
+    :return: The Manhattan distance between the two points.
+    """
+    return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
+
+
+def d2list(d):
+    """
+    Converts a dictionary to a list of key-value tuples.
+
+    :param d: A dictionary.
+    :return: A list of key-value tuples.
+    """
+    return [(k, v) for k, v in d.items()]
