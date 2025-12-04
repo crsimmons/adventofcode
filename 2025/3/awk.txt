@@ -1,0 +1,25 @@
+function P(a,i,n){return(r=match(a,i".{"n+1"}"))?i P(substr(a,r+1),9x,n-1):i?P(a,--i,n):m}
+
+a == search string
+i == digit candidate (starts at 9)
+n == recursion depth (problem part)
+
+match(a, regexp) returns index of longest, leftmost match of regexp in a
+
+i".{"n+1"}" expands as i followed by n+1 wildcards -> /9.{3}/ -> /9.../
+
+if there's a match it means there is i with sufficient digits to the right
+  -> recurse i P(a to the right of r resetting i to 9)
+
+if there isn't a match
+  -> if i is > 0 -> recurse with i - 1
+  -> if i == 0 -> return "" (uninitialized variable)
+
+
+{A+=P(b=P($0,9x,10),9x,0);B+=b}
+
+B (answer to part 2) = P(line,9,10)
+  n = 10 -> regex looks for a digit followed by n+1 others so total length is 12
+
+A (answer to part 1) = P(b,9,0)
+  b is already a subsequence of "best" high digits so best 2 digit subsequence is part of it
