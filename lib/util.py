@@ -126,3 +126,30 @@ def d2list(d):
     :return: A list of key-value tuples.
     """
     return [(k, v) for k, v in d.items()]
+
+def collapse_ranges(ranges):
+    """
+    Collapse overlapping ranges into a single range.
+
+    Args:
+        ranges (list): A list of tuples representing the ranges to be collapsed.
+
+    Returns:
+        list: A list of collapsed ranges.
+    """
+    if not ranges:
+        return []
+
+    ranges.sort(key=lambda x: x[0])
+
+    collapsed = [list(ranges[0])]
+
+    for current_start, current_end in ranges[1:]:
+        last_collapsed_end = collapsed[-1][1]
+
+        if current_start <= last_collapsed_end:
+            collapsed[-1][1] = max(last_collapsed_end, current_end)
+        else:
+            collapsed.append([current_start, current_end])
+
+    return [tuple(r) for r in collapsed]
